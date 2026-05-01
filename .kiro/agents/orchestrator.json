@@ -1,0 +1,36 @@
+{
+  "name": "orchestrator",
+  "description": "Development Orchestrator",
+  "prompt": "file://prompts/orchestrator.md",
+  "mcpServers": {
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "env": {},
+      "autoApprove": []
+    }
+  },
+  "tools": [
+    "*"
+  ],
+  "toolAliases": {},
+  "allowedTools": [],
+  "resources": [
+    "file://AGENTS.md",
+    "file://README.md",
+    "file://.kiro/steering/**/*.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "hooks": {},
+  "toolsSettings": {
+    "crew": {
+      "trustedAgents": [
+        "dev",
+        "code_reviewer",
+        "qa"
+      ]
+    }
+  },
+  "useLegacyMcpJson": false,
+  "model": "claude-opus-4.6"
+}
