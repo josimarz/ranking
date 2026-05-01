@@ -1,4 +1,4 @@
-- [ ] 1. Initialize Go project and configure tooling
+- [x] 1. Initialize Go project and configure tooling
 
   - Initialize Go module at `backend/` with `go mod init`
   - Create `cmd/api/main.go` with minimal placeholder
@@ -8,9 +8,9 @@
   - Add `go.sum` to version control
   - *Requirements: REQ-20, REQ-23, REQ-24*
 
-- [ ] 2. Implement shared packages (`pkg/`)
+- [x] 2. Implement shared packages (`pkg/`)
 
-  - [ ] 2.1 Implement `pkg/apperror` — application error types
+  - [x] 2.1 Implement `pkg/apperror` — application error types
 
     - Create `AppError` struct with `Code`, `Message`, `Status` fields
     - Define all error code constants: `VALIDATION_ERROR`, `MISSING_USER_ID`, `RANKING_NOT_FOUND`, `ITEM_NOT_FOUND`, `NOT_OWNER`, `NOT_AUTHORIZED`, `INVALID_SORT_FIELD`, `INVALID_CURSOR`, `INCOMPLETE_RATINGS`, `INVALID_IMAGE_FORMAT`, `IMAGE_TOO_LARGE`, `IMAGE_DOWNLOAD_FAILED`, `MAX_ITEMS_REACHED`, `INTERNAL_ERROR`
@@ -19,7 +19,7 @@
     - Write unit tests for all constructors and error code mappings
     - *Requirements: REQ-17*
 
-  - [ ] 2.2 Implement `pkg/pagination` — cursor encode/decode
+  - [x] 2.2 Implement `pkg/pagination` — cursor encode/decode
 
     - **Dependencies:** Task 2.1
     - Implement `EncodeCursor(lastEvaluatedKey map[string]types.AttributeValue) string` — base64-encode JSON of DynamoDB `LastEvaluatedKey`
@@ -29,7 +29,7 @@
     - Write property-based tests: **Property: any valid LastEvaluatedKey encodes and decodes to the same value**
     - *Requirements: REQ-18*
 
-  - [ ] 2.3 Implement `pkg/sorting` — JSON:API sort parameter parser
+  - [x] 2.3 Implement `pkg/sorting` — JSON:API sort parameter parser
 
     - **Dependencies:** Task 2.1
     - Define `SortField` struct with `Field string` and `Direction` (Ascending/Descending)
@@ -38,16 +38,16 @@
     - Write property-based tests: **Property: any combination of allowed fields with valid prefixes parses without error**
     - *Requirements: REQ-19*
 
-  - [ ] 2.4 Implement `pkg/uuid` — UUID v7 generation
+  - [x] 2.4 Implement `pkg/uuid` — UUID v7 generation
 
     - Implement `New() string` — generate UUID v7
     - Implement `IsValid(id string) bool` — validate UUID format
     - Write unit tests: generated UUID is valid, uniqueness, format validation
     - *Requirements: REQ-01, REQ-09, REQ-14*
 
-- [ ] 3. Implement domain layer (`internal/domain/`)
+- [x] 3. Implement domain layer (`internal/domain/`)
 
-  - [ ] 3.1 Implement `domain/ranking` — Ranking entity and value objects
+  - [x] 3.1 Implement `domain/ranking` — Ranking entity and value objects
 
     - **Dependencies:** Task 2.4
     - Create `Ranking` entity with fields: `ID`, `Name`, `NameLower`, `Description`, `Visibility`, `Tags`, `Attributes`, `OwnerUserId`, `CreatedAt`, `UpdatedAt`
@@ -68,7 +68,7 @@
       - **Property: visibility only accepts "public" or "private"**
     - *Requirements: REQ-01, REQ-02, REQ-03, REQ-04, REQ-05, REQ-06, REQ-07, REQ-08, REQ-21*
 
-  - [ ] 3.2 Implement `domain/item` — Item entity and interfaces
+  - [x] 3.2 Implement `domain/item` — Item entity and interfaces
 
     - **Dependencies:** Task 2.4
     - Create `Item` entity with fields: `ID`, `Name`, `ImageKey`, `RankingID`, `CreatedBy`, `CreatedAt`, `UpdatedAt`
@@ -85,7 +85,7 @@
       - **Property: CanBeModifiedBy returns true for ranking owner regardless of createdBy**
     - *Requirements: REQ-09, REQ-10, REQ-11, REQ-12, REQ-13, REQ-21*
 
-  - [ ] 3.3 Implement `domain/rating` — Rating entity
+  - [x] 3.3 Implement `domain/rating` — Rating entity
 
     - **Dependencies:** Task 2.4
     - Create `Rating` entity with fields: `RankingID`, `ItemID`, `UserID`, `Scores` (map[string]int), `CreatedAt`, `UpdatedAt`
@@ -101,9 +101,9 @@
       - **Property: overall equals the arithmetic mean of active attribute scores**
     - *Requirements: REQ-14, REQ-15, REQ-21*
 
-- [ ] 4. Implement DynamoDB infrastructure (`internal/infrastructure/dynamo/`)
+- [x] 4. Implement DynamoDB infrastructure (`internal/infrastructure/dynamo/`)
 
-  - [ ] 4.1 Implement DynamoDB client factory and key builders
+  - [x] 4.1 Implement DynamoDB client factory and key builders
 
     - **Dependencies:** Task 3.1
     - Implement `NewDynamoClient(cfg)` — create DynamoDB client with optional `AWS_ENDPOINT_URL` for LocalStack
@@ -112,7 +112,7 @@
     - Write unit tests for all key builders and mappers
     - *Requirements: REQ-01, REQ-02, REQ-09, REQ-14*
 
-  - [ ] 4.2 Implement `DynamoRankingRepository`
+  - [x] 4.2 Implement `DynamoRankingRepository`
 
     - **Dependencies:** Task 4.1
     - Implement `Save(ctx, ranking)` — PutItem for ranking METADATA + BatchWriteItem for tag items (GSI3), set GSI1/GSI2 keys based on visibility
@@ -127,7 +127,7 @@
     - Write unit tests with mocked DynamoDB client for each method
     - *Requirements: REQ-01, REQ-02, REQ-03, REQ-04, REQ-05, REQ-06, REQ-07, REQ-08*
 
-  - [ ] 4.3 Implement `DynamoItemRepository`
+  - [x] 4.3 Implement `DynamoItemRepository`
 
     - **Dependencies:** Task 4.1
     - Implement `Save(ctx, item)` — PutItem with PK=RANKING#rankingId, SK=ITEM#itemId
@@ -140,7 +140,7 @@
     - Write unit tests with mocked DynamoDB client
     - *Requirements: REQ-09, REQ-10, REQ-11, REQ-12*
 
-  - [ ] 4.4 Implement `DynamoRatingRepository`
+  - [x] 4.4 Implement `DynamoRatingRepository`
 
     - **Dependencies:** Task 4.1
     - Implement `Save(ctx, rating)` — PutItem with PK=RATING#rankingId#itemId, SK=USER#userId
@@ -151,7 +151,7 @@
     - Write unit tests with mocked DynamoDB client
     - *Requirements: REQ-14, REQ-15*
 
-- [ ] 5. Implement S3 infrastructure (`internal/infrastructure/s3/`)
+- [x] 5. Implement S3 infrastructure (`internal/infrastructure/s3/`)
 
   - **Dependencies:** Task 3.2
   - Implement `NewS3Client(cfg)` — create S3 client with optional `AWS_ENDPOINT_URL` for LocalStack
@@ -162,7 +162,7 @@
   - Write unit tests with mocked S3 client
   - *Requirements: REQ-13*
 
-- [ ] 6. Implement image processor (`internal/infrastructure/image/`)
+- [x] 6. Implement image processor (`internal/infrastructure/image/`)
 
   - **Dependencies:** Task 3.2
   - Implement `WebPProcessor.ValidateFormat(data []byte) error` — detect JPEG, PNG, WebP by magic bytes; return `INVALID_IMAGE_FORMAT` for others
@@ -174,9 +174,9 @@
     - **Property: output thumbnail dimensions are always 150×150**
   - *Requirements: REQ-13*
 
-- [ ] 7. Implement ranking use cases (`internal/application/ranking/`)
+- [x] 7. Implement ranking use cases (`internal/application/ranking/`)
 
-  - [ ] 7.1 Implement `CreateRankingUseCase`
+  - [x] 7.1 Implement `CreateRankingUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2
     - Accept input DTO with name, description, visibility, tags, attributes, userId
@@ -186,7 +186,7 @@
     - Write unit tests with mocked repository: success, validation failures
     - *Requirements: REQ-01*
 
-  - [ ] 7.2 Implement `GetRankingUseCase`
+  - [x] 7.2 Implement `GetRankingUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2
     - Accept ranking ID and optional userId
@@ -195,7 +195,7 @@
     - Write unit tests: found, not found, isOwner true/false
     - *Requirements: REQ-02*
 
-  - [ ] 7.3 Implement `UpdateRankingUseCase`
+  - [x] 7.3 Implement `UpdateRankingUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2
     - Accept ranking ID, userId, and update fields
@@ -204,7 +204,7 @@
     - Write unit tests: success, not owner, not found, validation errors
     - *Requirements: REQ-03*
 
-  - [ ] 7.4 Implement `DeleteRankingUseCase`
+  - [x] 7.4 Implement `DeleteRankingUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2, Task 4.3, Task 4.4, Task 5
     - Accept ranking ID and userId
@@ -213,7 +213,7 @@
     - Write unit tests: success, not owner, not found
     - *Requirements: REQ-04*
 
-  - [ ] 7.5 Implement `ListPublicRankingsUseCase`
+  - [x] 7.5 Implement `ListPublicRankingsUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2, Task 2.2, Task 2.3
     - Accept limit, cursor, sort parameters
@@ -223,7 +223,7 @@
     - Write unit tests: default sort, custom sort, pagination
     - *Requirements: REQ-05*
 
-  - [ ] 7.6 Implement `GetRecentRankingsUseCase`
+  - [x] 7.6 Implement `GetRecentRankingsUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2
     - Call `RankingRepository.FindRecent` (limit 10)
@@ -231,7 +231,7 @@
     - Write unit tests: returns up to 10, empty result
     - *Requirements: REQ-06*
 
-  - [ ] 7.7 Implement `SearchRankingsUseCase`
+  - [x] 7.7 Implement `SearchRankingsUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2, Task 2.2
     - Accept `q` (name term), `tag`, limit, cursor
@@ -242,7 +242,7 @@
     - Write unit tests: name search, tag search, combined, missing params
     - *Requirements: REQ-07*
 
-  - [ ] 7.8 Implement `ListMyRankingsUseCase`
+  - [x] 7.8 Implement `ListMyRankingsUseCase`
 
     - **Dependencies:** Task 3.1, Task 4.2, Task 2.2
     - Accept userId, limit, cursor, sort
@@ -251,9 +251,9 @@
     - Write unit tests: with results, empty, pagination
     - *Requirements: REQ-08*
 
-- [ ] 8. Implement item use cases (`internal/application/item/`)
+- [x] 8. Implement item use cases (`internal/application/item/`)
 
-  - [ ] 8.1 Implement `AddItemUseCase`
+  - [x] 8.1 Implement `AddItemUseCase`
 
     - **Dependencies:** Task 3.1, Task 3.2, Task 4.2, Task 4.3, Task 5, Task 6
     - Accept ranking ID, userId, name, optional image data or image URL
@@ -264,7 +264,7 @@
     - Write unit tests: success without image, success with image upload, success with image URL, max items reached, ranking not found
     - *Requirements: REQ-09, REQ-13*
 
-  - [ ] 8.2 Implement `ListItemsUseCase`
+  - [x] 8.2 Implement `ListItemsUseCase`
 
     - **Dependencies:** Task 3.1, Task 3.2, Task 3.3, Task 4.2, Task 4.3, Task 4.4, Task 5, Task 2.3
     - Accept ranking ID, mode (`avg`/`user`), optional userId, sort
@@ -276,7 +276,7 @@
     - Write unit tests: avg mode, user mode, user with no ratings, sorting by overall, sorting by attribute
     - *Requirements: REQ-10, REQ-19*
 
-  - [ ] 8.3 Implement `UpdateItemUseCase`
+  - [x] 8.3 Implement `UpdateItemUseCase`
 
     - **Dependencies:** Task 3.1, Task 3.2, Task 4.2, Task 4.3, Task 5, Task 6
     - Accept ranking ID, item ID, userId, updated name, optional new image
@@ -286,7 +286,7 @@
     - Write unit tests: success by owner, success by item creator, not authorized, not found
     - *Requirements: REQ-11, REQ-13*
 
-  - [ ] 8.4 Implement `DeleteItemUseCase`
+  - [x] 8.4 Implement `DeleteItemUseCase`
 
     - **Dependencies:** Task 3.1, Task 3.2, Task 4.2, Task 4.3, Task 4.4, Task 5
     - Accept ranking ID, item ID, userId
@@ -295,9 +295,9 @@
     - Write unit tests: success, not authorized, not found
     - *Requirements: REQ-12*
 
-- [ ] 9. Implement rating use cases (`internal/application/rating/`)
+- [x] 9. Implement rating use cases (`internal/application/rating/`)
 
-  - [ ] 9.1 Implement `SubmitRatingUseCase`
+  - [x] 9.1 Implement `SubmitRatingUseCase`
 
     - **Dependencies:** Task 3.1, Task 3.3, Task 4.2, Task 4.3, Task 4.4
     - Accept ranking ID, item ID, userId, scores map
@@ -307,7 +307,7 @@
     - Write unit tests: new rating, update existing, incomplete scores, invalid score range, ranking not found, item not found
     - *Requirements: REQ-14*
 
-  - [ ] 9.2 Implement `GetMyRatingUseCase`
+  - [x] 9.2 Implement `GetMyRatingUseCase`
 
     - **Dependencies:** Task 3.3, Task 4.4
     - Accept ranking ID, item ID, userId
@@ -316,7 +316,7 @@
     - Write unit tests: rated, not rated, not found
     - *Requirements: REQ-15*
 
-- [ ] 10. Implement HTTP middleware (`internal/interfaces/http/middleware/`)
+- [x] 10. Implement HTTP middleware (`internal/interfaces/http/middleware/`)
 
   - **Dependencies:** Task 2.1, Task 2.4
   - Implement `userid.go` — extract `X-User-Id` header, validate UUID format, inject into Gin context; do NOT reject (handlers decide)
@@ -327,7 +327,7 @@
   - Write unit tests for each middleware: userId extraction, requireUserId rejection, error mapping, CORS headers
   - *Requirements: REQ-17, REQ-22, REQ-23, REQ-24*
 
-- [ ] 11. Implement HTTP response helpers (`internal/interfaces/http/response/`)
+- [x] 11. Implement HTTP response helpers (`internal/interfaces/http/response/`)
 
   - **Dependencies:** Task 2.1, Task 2.2
   - Implement `success.go` — `RespondOK(c, data)`, `RespondCreated(c, data)`, `RespondNoContent(c)`
@@ -336,16 +336,16 @@
   - Write unit tests for response serialization
   - *Requirements: REQ-17, REQ-18*
 
-- [ ] 12. Implement HTTP handlers (`internal/interfaces/http/handler/`)
+- [x] 12. Implement HTTP handlers (`internal/interfaces/http/handler/`)
 
-  - [ ] 12.1 Implement `health.go` — Health check handler
+  - [x] 12.1 Implement `health.go` — Health check handler
 
     - **Dependencies:** Task 10, Task 11, Task 4.1
     - Implement `GET /api/v1/health` — check DynamoDB connectivity (DescribeTable), return `{ status, version, environment, dynamodb }`
     - Write unit tests: healthy, degraded (DynamoDB error)
     - *Requirements: REQ-16*
 
-  - [ ] 12.2 Implement `ranking.go` — Ranking HTTP handlers
+  - [x] 12.2 Implement `ranking.go` — Ranking HTTP handlers
 
     - **Dependencies:** Task 10, Task 11, Task 7.1, Task 7.2, Task 7.3, Task 7.4, Task 7.5, Task 7.6, Task 7.7, Task 7.8
     - Implement `Create` handler — bind JSON body, validate, call `CreateRankingUseCase`, return 201
@@ -359,7 +359,7 @@
     - Write unit tests for each handler with mocked use cases
     - *Requirements: REQ-01, REQ-02, REQ-03, REQ-04, REQ-05, REQ-06, REQ-07, REQ-08*
 
-  - [ ] 12.3 Implement `item.go` — Item HTTP handlers
+  - [x] 12.3 Implement `item.go` — Item HTTP handlers
 
     - **Dependencies:** Task 10, Task 11, Task 8.1, Task 8.2, Task 8.3, Task 8.4
     - Implement `Create` handler — bind multipart form (name + optional image file) or JSON (name + optional imageUrl), call `AddItemUseCase`, return 201
@@ -369,7 +369,7 @@
     - Write unit tests for each handler with mocked use cases
     - *Requirements: REQ-09, REQ-10, REQ-11, REQ-12*
 
-  - [ ] 12.4 Implement `rating.go` — Rating HTTP handlers
+  - [x] 12.4 Implement `rating.go` — Rating HTTP handlers
 
     - **Dependencies:** Task 10, Task 11, Task 9.1, Task 9.2
     - Implement `Submit` handler — bind JSON body (scores map), call `SubmitRatingUseCase`, return 200
@@ -377,9 +377,9 @@
     - Write unit tests for each handler with mocked use cases
     - *Requirements: REQ-14, REQ-15*
 
-- [ ] 13. Implement router and application entry point
+- [x] 13. Implement router and application entry point
 
-  - [ ] 13.1 Implement `router.go` — Gin router setup
+  - [x] 13.1 Implement `router.go` — Gin router setup
 
     - **Dependencies:** Task 10, Task 12.1, Task 12.2, Task 12.3, Task 12.4
     - Create `NewRouter(handlers, middleware)` function
@@ -390,7 +390,7 @@
     - Write unit test verifying all routes are registered with correct methods and paths
     - *Requirements: REQ-20, REQ-22*
 
-  - [ ] 13.2 Implement `cmd/api/main.go` — Lambda entry point and DI wiring
+  - [x] 13.2 Implement `cmd/api/main.go` — Lambda entry point and DI wiring
 
     - **Dependencies:** Task 13.1, Task 4.1, Task 5
     - Load configuration from environment variables
@@ -399,7 +399,7 @@
     - Detect environment: if `ENV=local`, start Gin HTTP server on port 8080; otherwise, start AWS Lambda handler using `github.com/aws/aws-lambda-go` with `github.com/awslabs/aws-lambda-go-api-proxy/gin` adapter
     - *Requirements: REQ-16, REQ-20, REQ-23, REQ-24*
 
-- [ ] 14. Add Swagger annotations to all handlers
+- [x] 14. Add Swagger annotations to all handlers
 
   - **Dependencies:** Task 12.2, Task 12.3, Task 12.4, Task 12.1
   - Add swaggo annotations to every handler function: `@Summary`, `@Description`, `@Tags`, `@Accept`, `@Produce`, `@Param`, `@Success`, `@Failure`, `@Router`
@@ -408,7 +408,7 @@
   - Verify Swagger UI renders correctly at `/api/v1/swagger/index.html`
   - *Requirements: REQ-20*
 
-- [ ] 15. Write integration tests with LocalStack
+- [x] 15. Write integration tests with LocalStack
 
   - **Dependencies:** Task 13.2
   - Set up test harness using testcontainers-go with LocalStack image

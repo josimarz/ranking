@@ -1,0 +1,717 @@
+basePath: /api/v1
+definitions:
+  handler.AttributeResponse:
+    properties:
+      active:
+        type: boolean
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  handler.ErrorBody:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/handler.ErrorBody'
+    type: object
+  handler.ItemListResponse:
+    properties:
+      id:
+        type: string
+      imageUrl:
+        type: string
+      name:
+        type: string
+      overall:
+        type: number
+      scores:
+        additionalProperties:
+          format: float64
+          type: number
+        type: object
+      thumbnailUrl:
+        type: string
+    type: object
+  handler.ItemResponse:
+    properties:
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      id:
+        type: string
+      imageKey:
+        type: string
+      name:
+        type: string
+      rankingId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  handler.PaginatedRankingResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handler.RankingResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/handler.PaginationResponse'
+    type: object
+  handler.PaginationResponse:
+    properties:
+      has_more:
+        type: boolean
+      next_cursor:
+        type: string
+    type: object
+  handler.RankingResponse:
+    properties:
+      attributes:
+        items:
+          $ref: '#/definitions/handler.AttributeResponse'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      isOwner:
+        type: boolean
+      name:
+        type: string
+      ownerUserId:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      visibility:
+        type: string
+    type: object
+  handler.RatingResponse:
+    properties:
+      createdAt:
+        type: string
+      itemId:
+        type: string
+      rankingId:
+        type: string
+      scores:
+        additionalProperties:
+          type: integer
+        type: object
+      updatedAt:
+        type: string
+      userId:
+        type: string
+    type: object
+  handler.SubmitRatingRequest:
+    properties:
+      scores:
+        additionalProperties:
+          type: integer
+        type: object
+    required:
+    - scores
+    type: object
+  handler.createItemRequest:
+    properties:
+      imageUrl:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handler.createRankingRequest:
+    properties:
+      attributes:
+        items:
+          $ref: '#/definitions/handler.rankingAttributeRequest'
+        type: array
+      description:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      visibility:
+        type: string
+    required:
+    - attributes
+    - name
+    - visibility
+    type: object
+  handler.healthResponse:
+    properties:
+      dynamodb:
+        type: string
+      environment:
+        type: string
+      status:
+        type: string
+      version:
+        type: string
+    type: object
+  handler.rankingAttributeRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handler.updateItemRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handler.updateRankingRequest:
+    properties:
+      attributes:
+        items:
+          $ref: '#/definitions/handler.rankingAttributeRequest'
+        type: array
+      description:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      visibility:
+        type: string
+    required:
+    - attributes
+    - name
+    - visibility
+    type: object
+info:
+  contact: {}
+  description: REST API for the Ranking product
+  title: Ranking API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Verifies DynamoDB connectivity and returns service health status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.healthResponse'
+      summary: Health check
+      tags:
+      - health
+  /rankings:
+    get:
+      description: List public rankings with pagination and sorting
+      parameters:
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination cursor
+        in: query
+        name: cursor
+        type: string
+      - description: Sort field (e.g. -createdAt)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PaginatedRankingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List public rankings
+      tags:
+      - rankings
+    post:
+      consumes:
+      - application/json
+      description: Create a new ranking with attributes
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createRankingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.RankingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create a new ranking
+      tags:
+      - rankings
+  /rankings/{id}:
+    delete:
+      description: Delete a ranking by ID
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete a ranking
+      tags:
+      - rankings
+    get:
+      description: Retrieve a ranking by ID
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        type: string
+      - description: Ranking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RankingResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get a ranking
+      tags:
+      - rankings
+    put:
+      consumes:
+      - application/json
+      description: Update an existing ranking
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Ranking data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.updateRankingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RankingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Update a ranking
+      tags:
+      - rankings
+  /rankings/{rankingId}/items:
+    get:
+      description: List items with computed scores (avg or user mode)
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - default: avg
+        description: Score mode (avg or user)
+        in: query
+        name: mode
+        type: string
+      - description: Sort field (e.g. -overall)
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.ItemListResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List items in a ranking
+      tags:
+      - items
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: Add a new item with optional image (JSON or multipart)
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - description: Item data (JSON)
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handler.createItemRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.ItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Add an item to a ranking
+      tags:
+      - items
+  /rankings/{rankingId}/items/{itemId}:
+    delete:
+      description: Delete an item and its associated ratings and images
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete an item
+      tags:
+      - items
+    put:
+      consumes:
+      - application/json
+      - multipart/form-data
+      description: Update an existing item with optional image (JSON or multipart)
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Item data (JSON)
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handler.updateItemRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.ItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Update an item
+      tags:
+      - items
+  /rankings/{rankingId}/items/{itemId}/rating:
+    put:
+      consumes:
+      - application/json
+      description: Submit or update scores for an item in a ranking
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      - description: Rating scores
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SubmitRatingRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RatingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Submit a rating
+      tags:
+      - ratings
+  /rankings/{rankingId}/items/{itemId}/rating/mine:
+    get:
+      description: Retrieve the current user's rating for an item
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - description: Ranking ID
+        in: path
+        name: rankingId
+        required: true
+        type: string
+      - description: Item ID
+        in: path
+        name: itemId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RatingResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Get my rating
+      tags:
+      - ratings
+  /rankings/mine:
+    get:
+      description: List rankings owned by the current user
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-Id
+        required: true
+        type: string
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination cursor
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PaginatedRankingResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List my rankings
+      tags:
+      - rankings
+  /rankings/recent:
+    get:
+      description: Retrieve the 10 most recent public rankings
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.RankingResponse'
+            type: array
+      summary: Get recent rankings
+      tags:
+      - rankings
+  /rankings/search:
+    get:
+      description: Search rankings by name or tag
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        type: string
+      - description: Tag filter
+        in: query
+        name: tag
+        type: string
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination cursor
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.PaginatedRankingResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Search rankings
+      tags:
+      - rankings
+swagger: "2.0"
