@@ -42,6 +42,64 @@ Creating a well-designed REST API is key to building scalable, maintainable, and
 - Allow clients to filter and sort data via query parameters.
 - Implement pagination to handle large datasets efficiently and reduce payload sizes.
 
+## Sorting Convention
+
+Follow the sorting convention established by the [JSON:API specification](https://jsonapi.org/format/#fetching-sorting) and adopted by industry API guidelines (Siemens, Google, Stripe, and others).
+
+### Parameter Name
+
+- Use a single query parameter named **`sort`**.
+
+### Sort Direction via Prefix
+
+- The default sort order **must be ascending**.
+- To request **descending** order, prefix the field name with a **minus sign** (`-`, U+002D HYPHEN-MINUS).
+- An explicit **plus sign** (`+`) prefix **may** be used for ascending, but it is optional since ascending is the default.
+
+Examples:
+
+```
+GET /rankings?sort=name          # ascending by name (default)
+GET /rankings?sort=-createdAt    # descending by createdAt (newest first)
+GET /rankings?sort=-overall      # descending by overall score (highest first)
+```
+
+### Multiple Sort Fields
+
+- Support multiple sort fields separated by **commas** (`,`).
+- Fields **must** be applied in the order specified (left to right).
+- Each field defines its own sort direction independently via the prefix.
+
+Examples:
+
+```
+GET /rankings?sort=-overall,name          # highest overall first, then alphabetical by name
+GET /rankings?sort=category,-createdAt    # by category ascending, then newest first within each category
+```
+
+### Rules
+
+- If the `sort` parameter references an unsupported or invalid field, the server **must** return `400 Bad Request`.
+- The set of sortable fields **must** be documented in the API specification (Swagger/OpenAPI).
+- Sorting **must not** trigger full table scans; every sortable field must be backed by an appropriate index or key design.
+- Sorting applies only to the current response and does not modify persisted data.
+
+### Backend Parsing
+
+The backend must parse the `sort` parameter as follows:
+
+1. Split the value by `,` to obtain individual sort fields.
+2. For each field:
+   - If it starts with `-`, strip the prefix and set direction to **descending**.
+   - Otherwise, set direction to **ascending** (strip `+` if present).
+3. Validate each field name against the allowed sortable fields for the endpoint.
+
+### References
+
+- [JSON:API Specification – Sorting](https://jsonapi.org/format/#fetching-sorting)
+- [Siemens API Guidelines – Sorting](https://developer.siemens.com/guidelines/api-guidelines/rest/sorting.html)
+- [Google AIP-132 – Standard method: List (ordering)](https://google.aip.dev/132)
+
 ## Version Your API
 - Use **semantic versioning** in the URL or headers, e.g., `/api/v1/products`.
 - Clearly document version changes and maintain backward compatibility.
